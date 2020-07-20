@@ -7,6 +7,12 @@ import 'antd/dist/antd.less'
 // 登录的路由界面
 export default class Login extends Component {
     render() {
+        const onFinish = values => {
+            console.log('Received values of form1: ', values);
+          };
+        const onFinishFailed = (values, errorFields, outOfDate) => {
+            console.log('Received values of form2: ', values);
+          };
         return (
             <div className="login">
                 <header className="login-header">
@@ -19,17 +25,28 @@ export default class Login extends Component {
                         name="normal_login"
                         className="login-form"
                         initialValues={{ remember: true }}
-                        onSubmit={this.handleSubmit}
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
                         >
                         <Form.Item
                             name="username"
-                            rules={[{ required: true, message: '请输入您的用户名！' }]}
+                            rules={[
+                                { required: true, whitespace:true, message: '请输入您的用户名！' },
+                                { min: 4, message: '用户名至少4位！' },
+                                { max: 12, message: '用户名最多12位！' },
+                                { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名必须是英文、数字或下划线组成！' },
+                            ]}
                         >
                             <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="用户名" />
                         </Form.Item>
                         <Form.Item
                             name="password"
-                            rules={[{ required: true, message: '请输入您的密码！' }]}
+                            rules={[
+                                { required: true, message: '请输入您的密码！' },
+                                { min: 4, message: '密码至少4位！' },
+                                { max: 12, message: '密码最多12位！' },
+                                { pattern: /^[a-zA-Z0-9_]+$/, message: '密码必须是英文、数字或下划线组成！' },
+                            ]}
                         >
                             <Input
                             prefix={<LockOutlined className="site-form-item-icon" />}
