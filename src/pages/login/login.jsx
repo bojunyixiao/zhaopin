@@ -1,17 +1,38 @@
 import React, { Component } from 'react'
-import { Form, Input, Button} from 'antd';
+import { Form, Input, Button,message} from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import './login.less'
 import login from './images/logo.png'
 import 'antd/dist/antd.less'
+import {reqLogin} from '../../api'
+import memoryUtils from '../../utils/memoryUtils'
+import storageUtils from '../../utils/storageUtils'
+import { Redirect } from 'react-router-dom';
+
 // 登录的路由界面
 export default class Login extends Component {
     render() {
+        //如果用户已经登录，则跳转到管理界面
+        const user = memoryUtils.user
+        if(user && user._id){
+            return <Redirect  to='/' />
+        }
         const onFinish = values => {
-            console.log('Received values of form1: ', values);
-          };
-        const onFinishFailed = (values, errorFields, outOfDate) => {
-            console.log('Received values of form2: ', values);
+            reqLogin(values.username,values.password).then( response => {
+                if(response.data.status === 0){
+                    // 提示登陆成功
+                    message.success('登陆成功')
+                    // 保存user
+                    const user = response.data.data
+                    memoryUtils.user = user
+                    storageUtils.saveUser(user)
+                    // 跳转到管理界面(不需要退回到登录)
+                    this.props.history.replace('/')
+                }else{
+                    // 提示登陆失败
+                    message.error('用户名或密码错误')
+                }
+            })
           };
         return (
             <div className="login">
@@ -26,7 +47,6 @@ export default class Login extends Component {
                         className="login-form"
                         initialValues={{ remember: true }}
                         onFinish={onFinish}
-                        onFinishFailed={onFinishFailed}
                         >
                         <Form.Item
                             name="username"
