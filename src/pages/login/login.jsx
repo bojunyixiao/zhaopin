@@ -20,12 +20,12 @@ export default class Login extends Component {
         const onFinish = values => {
             reqLogin(values.username,values.password).then( response => {
                 if(response.data.status === 0){
-                    // 提示登陆成功
-                    message.success('登陆成功')
                     // 保存user
                     const user = response.data.data
                     memoryUtils.user = user
                     storageUtils.saveUser(user)
+                    // 提示登陆成功
+                    message.success('登陆成功，'+ user.username)
                     // 跳转到管理界面(不需要退回到登录)
                     this.props.history.replace('/')
                 }else{
