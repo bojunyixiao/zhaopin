@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { Form, Input, Button,message} from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import './login.less'
-import login from './images/logo.png'
+import login from '../../assets/images/logo.png'
 import 'antd/dist/antd.less'
 import {reqLogin} from '../../api'
 import memoryUtils from '../../utils/memoryUtils'
