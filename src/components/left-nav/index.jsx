@@ -65,7 +65,6 @@ class LeftNav extends Component {
      * 在第一次render之前执行一次
      */
     componentWillMount() {
-        console.log(this)
         this.getMenuNodes = this.getMenuNodes(menuList)
 
     }
