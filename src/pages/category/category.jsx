@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Card , Table , Button, message } from 'antd';
-import {PlusOutlined} from '@ant-design/icons';
+import {PlusOutlined,ArrowRightOutlined} from '@ant-design/icons';
 
 import LinkButton from '../../components/link-button'
 import {reqCategorys} from '../../api'
@@ -9,8 +9,11 @@ import {reqCategorys} from '../../api'
  */
 export default class Category extends Component {
     state = {
-        categorys : [],
-        loading : false
+        loading : false,//是否正在获取数据中
+        categorys : [],//一级分类列表
+        subCategorys : [],//二级分类列表
+        parentId : '0',//当前需要显示的父列表的Id
+        parentName : '',//当前需要显示的父列表的Name
     }
 
     //初始化Table标题
@@ -23,10 +26,10 @@ export default class Category extends Component {
             {
               title: '操作',
               width:300,
-              render: () => (//返回需要显示的界面标签
+              render: (categorys) => (//返回需要显示的界面标签
                 <span>
                     <LinkButton>修改分类</LinkButton>
-                    <LinkButton>查看子分类</LinkButton>
+                    {this.state.parentId==='0'?<LinkButton onClick={() => {this.showSubCategorys(categorys)}}>查看子分类</LinkButton>:null}
                 </span>
               ),
             }
@@ -35,17 +38,43 @@ export default class Category extends Component {
 
     //Table信息获取
     getCategorys = async() => {
+        const {parentId} =  this.state
         //发送请求前，显示loading
         this.setState({loading:true})
-        const result =  await reqCategorys('0')
+        const result =  await reqCategorys(parentId)
         //发送请求后，隐藏loading
         this.setState({loading:false})
         if(result.data.status === 0){
             const categorys = result.data.data
-            this.setState({categorys})
+            if(parentId==='0'){
+                //一级分类
+                this.setState({categorys})
+            }else{
+                //二级分类
+                this.setState({subCategorys:categorys})
+            }
         }else{
             message.error("获取分类列表失败")
         }
+    }
+
+    //点击查看子分类，显示子分类内容
+    showSubCategorys = (categorys) => {
+        this.setState({
+            parentId : categorys._id,
+            parentName : categorys.name
+        },()=>{
+            this.getCategorys()
+        })
+    }
+
+    //点击一级分类回退到一级分类
+    showCategorys = () => {
+        this.setState({
+            parentId : '0',
+            parentName : '',
+            subCategorys : []
+        })
     }
 
     //为第一次render准备数据
@@ -61,8 +90,14 @@ export default class Category extends Component {
 
     render() {
         //Card的左侧标题
-        const title = '一级分类列表'
-        const {categorys,loading} = this.state
+        const {categorys,loading,subCategorys,parentId,parentName} = this.state
+        const title = parentId==='0' ? '一级分类列表' : (
+            <span>
+                <LinkButton onClick={()=>{this.showCategorys()}}>一级分类列表</LinkButton>
+                <ArrowRightOutlined style={{marginRight:5}} />
+                <span>{parentName}</span>
+            </span>
+        )
         const extra = (
             <Button type="primary" icon={<PlusOutlined />}>
                 添加
@@ -75,7 +110,7 @@ export default class Category extends Component {
                     bordered
                     rowKey='_id'
                     loading={loading}
-                    dataSource={categorys}
+                    dataSource={parentId==='0'?categorys:subCategorys}
                     columns={this.columns}
                     pagination={{defaultPageSize:5,showQuickJumper:true}}
                 />
