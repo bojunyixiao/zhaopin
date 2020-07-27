@@ -29,7 +29,7 @@ class Header extends Component {
 
     //天气
     getWeather = async()=>{
-        const {dayPictureUrl,weather} = await reqWeather('天津')
+        const {dayPictureUrl,weather} = await reqWeather('河北区')
         this.setState({dayPictureUrl,weather})
     }
 
