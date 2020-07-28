@@ -33,8 +33,7 @@ export default class AddForm extends Component {
                     name='inputName'
                     initialValue=''
                     rules={[
-                        { required: true, message: '分类名称必须输入' },
-                        { pattern: /^[ ]*$/, message: '不能有空格！' },
+                        { required: true, message: '分类名称必须输入' }
                     ]}
                 >
                     <Input placeholder='请输入分类名称' />
