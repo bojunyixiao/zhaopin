@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
-import {Card,Select,Input,Button,Table} from 'antd'
+import {Card,Select,Input,Button,Table, message} from 'antd'
 import {PlusOutlined} from '@ant-design/icons'
 
 import LinkButton from '../../components/link-button'
-import {reqProducts,reqSearchProducts} from '../../api'
+import {reqProducts,reqSearchProducts,reqUpdateStatus} from '../../api'
 import {PAGE_SIZE} from '../../utils/constants'
 
 const Option = Select.Option
@@ -35,12 +35,14 @@ export default class ProductHome extends Component {
             {
               width:100,
               title: '状态',
-              dataIndex: 'status',
-              render:(status) => {
+              // dataIndex: 'status',
+              render:(product) => {
+                const {status,_id} = product
+                const newStatus = status===1?2:1
                   return (
                       <span>
-                          <Button type='primary'>下架</Button>
-                          <span>在售</span>
+                          <Button type='primary' onClick={() => this.updateStatus(_id,newStatus)}>{status===1?'下架':'上架'}</Button>
+                          <span>{status===1?'在售':'已下架'}</span>
                       </span>
                   )
               }
@@ -51,7 +53,8 @@ export default class ProductHome extends Component {
               render:(product) => {
                   return (
                       <span>
-                          <LinkButton>详情</LinkButton>
+                        {/* 将product对象使用的state传递给目标路由组件 */}
+                          <LinkButton onClick={() => this.props.history.push('/product/detail',{product})}>详情</LinkButton>
                           <LinkButton>修改</LinkButton>
                       </span>
                   )
@@ -60,8 +63,20 @@ export default class ProductHome extends Component {
         ];
     }
 
+    /**
+     * 更新商品的状态
+     */
+    updateStatus = async(productId,status) => {
+      const result = await reqUpdateStatus(productId,status)
+      if(result.data.status === 0){
+        message.success("更新商品成功")
+        this.getProducts(this.pageNum)
+      }
+    }
+
     //获取指定页码的列表数据显示
     getProducts = async(pageNum) => {
+      this.pageNum = pageNum //保存pageNum，让其上下架刷新页面时能回到对应页面
       this.setState({loading:true})//显示loading
       const {searchContent,searchType} = this.state
       let result
