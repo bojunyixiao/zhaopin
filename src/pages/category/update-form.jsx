@@ -17,7 +17,6 @@ class UpdateForm extends Component {
     }
 
     componentDidUpdate() {
-        console.log(this)
         this.formRef.current.setFieldsValue({
             categoryName: this.props.categoryName,
         });
