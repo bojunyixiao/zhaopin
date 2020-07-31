@@ -47,7 +47,7 @@ class LeftNav extends Component {
                     )
                 ))
             }else{
-                const cItem = item.children.find(cItem => cItem.key === path)
+                const cItem = item.children.find(cItem => path.indexOf(cItem.key)===0)//防止出现刷新页面会左侧栏不展开情况
                 if(cItem){
                     this.openKey = item.key
                 }
@@ -70,7 +70,10 @@ class LeftNav extends Component {
     }
 
     render() {
-        const path = this.props.location.pathname
+        let path = this.props.location.pathname
+        if(path.indexOf('/product')===0){//防止进入商品管理的详情页面会出现光标不选中情况
+            path = '/product'
+        }
         const openKey = this.openKey
         return (
             <div className="left-nav">
