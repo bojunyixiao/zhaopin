@@ -32,6 +32,11 @@ export const reqSearchProducts = (pageNum,pageSize,searchContent,searchType) => 
     [searchType]:searchContent
 })
 
+//删除图片
+export const reqDeleteImg = (name) => ajax('/manage/img/delete',{name},'POST')
+
+//获取所有角色的列表
+export const reqRoles = () => ajax('/manage/role/list')
 /**
  * json请求的接口请求函数
  */

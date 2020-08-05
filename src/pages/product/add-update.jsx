@@ -4,6 +4,7 @@ import {ArrowLeftOutlined} from '@ant-design/icons'
 
 import LinkButton from '../../components/link-button'
 import {reqCategorys} from '../../api'
+import PicturesWall from './pictures-wall'
 
 const {Item} = Form
 const { TextArea } = Input;
@@ -13,13 +14,39 @@ export default class ProductAddUpdate extends Component {
           options:[]
         };
         
-        initOption = (categorys) => {
+        constructor (props){
+            super(props)
+            //创建用来保存ref标识的标签对象容器
+            this.pw = React.createRef()
+        }
+
+        initOption = async(categorys) => {
             //根据categorys数据生成options数组
             const options = categorys.map(c => ({
                 value: c._id,
                 label: c.name,
                 isLeaf: false,
             }))
+
+            //如果是一个二级分类商品的更新
+            const {isUpdate,product} = this
+            const {pCategoryId,categoryId} = product
+            if(isUpdate && pCategoryId !== '0'){
+                //获取对应的二级分类列表
+                const subCategorys = await this.getCategorys(pCategoryId)
+                //生成二级下拉列表的options
+                const childOptions = subCategorys.map(c => ({
+                    value: c._id,
+                    label: c.name,
+                    isLeaf: true,
+                }))
+
+                //找到当前商品对应的一级option对象
+                const targetOption = options.find(option => option.value === pCategoryId)
+                console.log(targetOption)
+                //关联对应的一级option上
+                targetOption.children = childOptions
+            }
 
             //更新options状态
             this.setState({options})
@@ -91,12 +118,28 @@ export default class ProductAddUpdate extends Component {
 
     }
     
-    
     render() {
         const {isUpdate,product} = this
 
+        const {pCategoryId,categoryId} = product
+        //用来接收级联分类ID的数组
+        const categoryIds = []
+        if(isUpdate){
+            //商品是一个一级分类商品
+            if(pCategoryId == 0){
+                categoryIds.push(categoryId)
+            }else{
+                //商品是一个二级分类的商品
+                categoryIds.push(pCategoryId)
+                categoryIds.push(categoryId)
+            }
+        }
+
+
         const onFinish = values => {
             console.log('Success:', values);
+            const imgs = this.pw.current
+            console.log("imgs",imgs)
         }
 
         const layout = {
@@ -150,14 +193,14 @@ export default class ProductAddUpdate extends Component {
                     >
                         <Input type="number" addonAfter="元" placeholder="请输入商品价格" />
                     </Item>
-                    <Item label="商品分类" name="productType">
+                    <Item label="商品分类" name="productType" initialValue={categoryIds}>
                         <Cascader
                             options={this.state.options}
                             loadData={this.loadData}
                         />
                     </Item>
-                    <Item label="商品图片">
-                        <div>商品图片</div>
+                    <Item label="商品图片" >
+                        <PicturesWall ref={this.pw} />
                     </Item>
                     <Item label="商品详情">
                         <div>商品详情</div>
