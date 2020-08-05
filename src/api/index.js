@@ -37,6 +37,13 @@ export const reqDeleteImg = (name) => ajax('/manage/img/delete',{name},'POST')
 
 //获取所有角色的列表
 export const reqRoles = () => ajax('/manage/role/list')
+
+//添加角色
+export const reqAddRole = (roleName) => ajax('/manage/role/add',{roleName},'POST')
+
+//更新角色（给角色设置权限）
+export const reqUpdataRole = (role) => ajax('/manage/role/update',role,'POST')
+
 /**
  * json请求的接口请求函数
  */

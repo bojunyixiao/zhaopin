@@ -4,6 +4,10 @@ import { Card , Button , Table , message , Modal} from 'antd'
 import {PAGE_SIZE} from "../../utils/constants"
 import {reqRoles} from '../../api'
 import AddForm from './add-form'
+import AuthForm from './auth-form'
+import {reqAddRole , reqUpdataRole} from '../../api'
+import memoryUtils from '../../utils/memoryUtils'
+import {formateDate} from '../../utils/dateUtils'
 
 /**
  * 角色路由
@@ -14,6 +18,7 @@ export default class Role extends Component {
         roles:[],//所有角色的列表
         role:{},//选中的role
         isShowAdd:false, //是否显示添加界面
+        isShowAuth:false,//是否显示权限界面
     }
 
     initColumn = () => {
@@ -24,11 +29,13 @@ export default class Role extends Component {
             },
             {
                 title:'创建时间',
-                dataIndex:'create_time'
+                dataIndex:'create_time',
+                render:(create_time) => formateDate(create_time)//复杂的写，与下面的授权时间对比
             },
             {
                 title:'授权时间',
-                dataIndex:'auth_time'
+                dataIndex:'auth_time',
+                render:formateDate //简单的写，因为render会传值dataIndex
             },
             {
                 title:'授权人',
@@ -50,8 +57,9 @@ export default class Role extends Component {
     onRow = (role)=> {
         return {
             onClick: event => {// 点击行
-                console.log("role onclick",role)
+                this.authRole = role
                 this.setState({role})
+                console.log('click onRow',role)
             }, 
         }
     }
@@ -59,18 +67,47 @@ export default class Role extends Component {
     /**
      * 添加角色，点击ok
      */
-    addRole = () => {//点击ok
-        this.setState({isShowAdd:false})
-    }
-    addRoles = () => {//点击ok
-        this.setState({isShowAdd:true})
+    addRole = async () => {//点击ok
+        // const roleName = this.formRef.refs.formRef.getFieldsValue().inputName
+        const roleName = this.refs.addForm.refs.formRef.getFieldsValue().inputName
+        if(roleName !== ''){
+            //隐藏确定
+            this.setState({isShowAdd:false})
+            const result = await reqAddRole(roleName)
+            if(result.data.status === 0){
+                this.getRoles()
+            }
+        }
     }
 
     /**
-     * 添加角色，点击Cancel
+     * 添加权限角色，点击ok
      */
-    handleCancel = () => {//点击Cancel
-        this.setState({isShowAdd:false})
+    updataRole = async () => {
+        //隐藏确认框
+        this.setState({isShowAuth:false})
+
+        const {role} = this.state
+        //得到最新的menus
+        const menus = this.refs.authForm.getMenus()
+        role.menus = menus
+        role.auth_name = memoryUtils.user.username
+        role.auth_time = Date.now()
+        //请求更新
+        const result = await reqUpdataRole(role)
+        if(result.data.status === 0){
+            message.success("角色权限设置成功")
+            this.setState({roles:[...this.state.roles]})//神方法：如果role改变了，roles的那一项也改变了，直接[...]就可
+        }
+    }
+
+    //点击设置权限角色 按钮
+    authRoles = () => {
+        this.setState({isShowAuth:true})
+    }
+    //点击创建角色
+    addRoles = () => {//点击ok
+        this.setState({isShowAdd:true})
     }
 
     componentWillMount() {
@@ -83,11 +120,12 @@ export default class Role extends Component {
     
     
     render() {
-        const {roles,role,isShowAdd} = this.state
+        const {roles,role,isShowAdd,isShowAuth} = this.state
+        const {authRole} =  this
         const title = (
             <span>
                 <Button type="primary" onClick={() => this.addRoles(this)}>创建角色</Button>
-                <Button type="primary" disabled={!role._id} style={{marginLeft:'15px'}}>设置角色权限</Button>
+                <Button type="primary" disabled={!role._id} style={{marginLeft:'15px'}} onClick={() => this.authRoles(this)}>设置角色权限</Button>
             </span>
         )
         return (
@@ -99,7 +137,7 @@ export default class Role extends Component {
                     dataSource={roles}
                     columns={this.columns}
                     pagination={{defaultPageSize:PAGE_SIZE}}
-                    rowSelection={{type:'radio',selectedRowKeys:[role._id]}}
+                    rowSelection={{type:'radio',selectedRowKeys:[role._id]}}//selectedRowKeys指定选中项的 key 数组
                     onRow={this.onRow}
                     />;
                 </Card>
@@ -107,10 +145,26 @@ export default class Role extends Component {
                     title="添加分类"
                     visible={isShowAdd}
                     onOk={this.addRole}
-                    onCancel={this.handleCancel}
+                    onCancel={() => {
+                        this.setState({isShowAdd:false})
+                    }}
                 >
                     <AddForm
-                        ref={(formRef) => {this.formRef = formRef}}
+                        // ref={(formRef) => {this.formRef = formRef}}
+                        ref = 'addForm'
+                    />
+                </Modal>
+                <Modal
+                    title="设置角色权限"
+                    visible={isShowAuth}
+                    onOk={this.updataRole}
+                    onCancel={() => {
+                        this.setState({isShowAuth : false})
+                    }}
+                >
+                    <AuthForm
+                        authRole = {authRole}
+                        ref = 'authForm'
                     />
                 </Modal>
             </div>

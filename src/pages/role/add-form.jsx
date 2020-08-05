@@ -10,16 +10,18 @@ const Item = Form.Item
  */
 export default class AddForm extends Component {
 
-    // componentDidUpdate() {
-    //     this.refs.formRef.setFieldsValue({
-    //         inputName : ''
-    //     });
-    // }
+    //render后把input中的值去除
+    componentDidUpdate() {
+        this.refs.formRef.setFieldsValue({
+            inputName : ''
+        });
+    }
 
     render() {
         return (
             <Form ref='formRef'>
                 <Item
+                    label="角色名称："
                     name='inputName'
                     initialValue=''
                     rules={[
