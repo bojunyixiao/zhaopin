@@ -36,7 +36,7 @@ class LeftNav extends Component {
     getMenuNodes = (menuList) => {
         return menuList.reduce((pre,item) => {
             const path = this.props.location.pathname
-            if(!item.children){
+            if(!item.children){//数组累计的方法reduce+push
                 pre.push((
                     (
                         <Menu.Item key={item.key} icon={item.icon}>

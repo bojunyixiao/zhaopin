@@ -38,6 +38,15 @@ export const reqAddOrUpdateProduct = (product) => ajax('/manage/product/' + (pro
 //删除图片
 export const reqDeleteImg = (name) => ajax('/manage/img/delete',{name},'POST')
 
+//获取所有用户列表
+export const reqUsers = () => ajax('/manage/user/list')
+
+//添加/更新用户
+export const reqAddOrUpdateUsers = (user) => ajax('/manage/user/' + (user._id?'update':'add'),user,'POST')
+
+//删除用户
+export const reqDeleteUsers = (userId) => ajax('/manage/user/delete',{userId},'POST')
+
 //获取所有角色的列表
 export const reqRoles = () => ajax('/manage/role/list')
 

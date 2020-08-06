@@ -171,8 +171,8 @@ export default class ProductAddUpdate extends Component {
         }
 
         const layout = {
-            labelCol: { span: 2 },
-            wrapperCol: { span: 8 },
+            labelCol: { span: 4 },
+            wrapperCol: { span: 14 },
           };
 
         const title = (

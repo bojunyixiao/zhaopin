@@ -62,7 +62,7 @@ class Header extends Component {
                 //跳转到login页面
                 this.props.history.replace('/login')
             }
-          });
+        });
     }
     /**
      * 完成第一次render后调用

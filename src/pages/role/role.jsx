@@ -139,7 +139,7 @@ export default class Role extends Component {
                     pagination={{defaultPageSize:PAGE_SIZE}}
                     rowSelection={{type:'radio',selectedRowKeys:[role._id]}}//selectedRowKeys指定选中项的 key 数组
                     onRow={this.onRow}
-                    />;
+                    />
                 </Card>
                 <Modal
                     title="添加分类"
