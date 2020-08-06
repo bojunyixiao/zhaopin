@@ -1,10 +1,11 @@
 import React, { Component } from 'react'
-import {Card,Form,Input,Button,Cascader} from 'antd'
+import {Card,Form,Input,Button,Cascader, message} from 'antd'
 import {ArrowLeftOutlined} from '@ant-design/icons'
 
 import LinkButton from '../../components/link-button'
-import {reqCategorys} from '../../api'
+import {reqCategorys,reqAddOrUpdateProduct} from '../../api'
 import PicturesWall from './pictures-wall'
+import RichTextEditor from './rich-text-editor'
 
 const {Item} = Form
 const { TextArea } = Input;
@@ -18,6 +19,7 @@ export default class ProductAddUpdate extends Component {
             super(props)
             //创建用来保存ref标识的标签对象容器
             this.pw = React.createRef()
+            this.editor = React.createRef()
         }
 
         initOption = async(categorys) => {
@@ -121,7 +123,7 @@ export default class ProductAddUpdate extends Component {
     render() {
         const {isUpdate,product} = this
 
-        const {pCategoryId,categoryId} = product
+        const {pCategoryId,categoryId,imgs,detail} = product
         //用来接收级联分类ID的数组
         const categoryIds = []
         if(isUpdate){
@@ -136,10 +138,36 @@ export default class ProductAddUpdate extends Component {
         }
 
 
-        const onFinish = values => {
-            console.log('Success:', values);
-            const imgs = this.pw.current
-            console.log("imgs",imgs)
+        const onFinish = async values => {
+            //1、收集数据，并封装成product对象
+            const {productName,productDesc,productPrice,productType} = values
+            let pCategoryId , categoryId
+            console.log('values:',values)
+            if(productType.length===1){
+                pCategoryId = '0'
+                categoryId = productType[0]
+            }else{
+                pCategoryId = productType[0]
+                categoryId = productType[1]
+            }
+            const imgs = this.pw.current.getImgs()
+            const detail = this.editor.current.getDetail()
+
+            const product = {name:productName,desc:productDesc,price:productPrice,imgs,detail,pCategoryId,categoryId}
+            //如果是更新，需要添加_id
+            if(this.isUpdate){
+                product._id = this.product._id
+            }
+            //2、调用接口请求函数去添加/更新
+            const result = await reqAddOrUpdateProduct(product)
+            //3、根据结果提示
+            const messageAddOrUpdate = this.isUpdate?'修改':'添加'
+            if(result.data.status === 0){
+                message.success(messageAddOrUpdate+'商品成功！')
+                this.props.history.goBack()
+            }else{
+                message.error(messageAddOrUpdate+ '商品失败！')
+            }
         }
 
         const layout = {
@@ -199,11 +227,11 @@ export default class ProductAddUpdate extends Component {
                             loadData={this.loadData}
                         />
                     </Item>
-                    <Item label="商品图片" >
-                        <PicturesWall ref={this.pw} />
+                    <Item label="商品图片">
+                        <PicturesWall ref={this.pw} imgs={imgs} />
                     </Item>
-                    <Item label="商品详情">
-                        <div>商品详情</div>
+                    <Item label="商品详情" labelCol={{span: 2}} wrapperCol={{span: 20}}>
+                        <RichTextEditor ref={this.editor} detail={detail} />
                     </Item>
                     <Item>
                         <Button type="primary" htmlType="submit">提交</Button>
