@@ -32,7 +32,7 @@ export default class ProductAddUpdate extends Component {
 
             //如果是一个二级分类商品的更新
             const {isUpdate,product} = this
-            const {pCategoryId,categoryId} = product
+            const {pCategoryId} = product
             if(isUpdate && pCategoryId !== '0'){
                 //获取对应的二级分类列表
                 const subCategorys = await this.getCategorys(pCategoryId)
@@ -128,7 +128,7 @@ export default class ProductAddUpdate extends Component {
         const categoryIds = []
         if(isUpdate){
             //商品是一个一级分类商品
-            if(pCategoryId == 0){
+            if(pCategoryId === 0){
                 categoryIds.push(categoryId)
             }else{
                 //商品是一个二级分类的商品
