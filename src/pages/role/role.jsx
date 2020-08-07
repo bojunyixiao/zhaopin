@@ -7,6 +7,7 @@ import AddForm from './add-form'
 import AuthForm from './auth-form'
 import {reqAddRole , reqUpdataRole} from '../../api'
 import memoryUtils from '../../utils/memoryUtils'
+import storageUtils from '../../utils/storageUtils'
 import {formateDate} from '../../utils/dateUtils'
 
 /**
@@ -59,7 +60,7 @@ export default class Role extends Component {
             onClick: event => {// 点击行
                 this.authRole = role
                 this.setState({role})
-                console.log('click onRow',role)
+                // console.log('click onRow',role)
             }, 
         }
     }
@@ -96,8 +97,18 @@ export default class Role extends Component {
         //请求更新
         const result = await reqUpdataRole(role)
         if(result.data.status === 0){
-            message.success("角色权限设置成功")
-            this.setState({roles:[...this.state.roles]})//神方法：如果role改变了，roles的那一项也改变了，直接[...]就可
+            //如果当前更新的是自己角色的权限，强制退出
+            if(role._id===memoryUtils.user.role_id){
+                //删除保存的user数据
+                storageUtils.removeUser()
+                memoryUtils.user = {}
+                //跳转到login页面
+                this.props.history.replace('/login')
+                message.warning("当前用户角色权限修改了，请重新登录")
+            }else{
+                message.success("角色权限设置成功")
+                this.setState({roles:[...this.state.roles]})//神方法：如果role改变了，roles的那一项也改变了，直接[...]就可
+            }
         }
     }
 
@@ -137,7 +148,13 @@ export default class Role extends Component {
                     dataSource={roles}
                     columns={this.columns}
                     pagination={{defaultPageSize:PAGE_SIZE}}
-                    rowSelection={{type:'radio',selectedRowKeys:[role._id]}}//selectedRowKeys指定选中项的 key 数组
+                    rowSelection={{
+                        type:'radio',
+                        selectedRowKeys:[role._id],
+                        onSelect:(role) => {
+                            this.setState({role})//解决点击checkbox不响应问题
+                        }
+                    }}//selectedRowKeys指定选中项的 key 数组
                     onRow={this.onRow}
                     />
                 </Card>

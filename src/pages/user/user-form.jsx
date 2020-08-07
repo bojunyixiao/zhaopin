@@ -19,13 +19,19 @@ export default class UserForm extends PureComponent {
 
     //render后把input中的值去除
     componentDidUpdate() {
+        const user = this.props.user || {}
         this.formRef.current.setFieldsValue({
-            inputName : ''
+            username : user.username,
+            password : user.password,
+            phone : user.phone,
+            email : user.email,
+            role_id : user.role_id
         });
     }
 
     render() {
         const {roles} = this.props
+        const user = this.props.user || {}
         const layout = {
             labelCol: { span: 5 },
             wrapperCol: { span: 16 },
@@ -38,27 +44,35 @@ export default class UserForm extends PureComponent {
                 <Item
                     label="用户名："
                     name='username'
-                    initialValue=''
+                    initialValue={user.username}
                     rules={[
-                        { required: true, message: '用户名必须输入' }
+                        { required: true, message: '用户名必须输入' },
+                        { min: 4, message: '用户名至少4位！' },
+                        { max: 12, message: '用户名最多12位！' },
+                        { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名必须是英文、数字或下划线组成！' },
                     ]}
                 >
                     <Input placeholder='请输入用户名' />
                 </Item>
-                <Item
-                    label="密码："
-                    name='password'
-                    initialValue=''
-                    rules={[
-                        { required: true, message: '密码必须输入' }
-                    ]}
-                >
-                    <Input type='password' placeholder='请输入密码' />
-                </Item>
+                {user._id ? null : (
+                    <Item
+                        label="密码："
+                        name='password'
+                        initialValue={user.password}
+                        rules={[
+                            { required: true, message: '密码必须输入' },
+                            { min: 4, message: '密码至少4位！' },
+                            { max: 12, message: '密码最多12位！' },
+                            { pattern: /^[a-zA-Z0-9_]+$/, message: '密码必须是英文、数字或下划线组成！' },
+                        ]}
+                    >
+                        <Input type='password' placeholder='请输入密码' />
+                    </Item>
+                )}
                 <Item
                     label="手机号："
                     name='phone'
-                    initialValue=''
+                    initialValue={user.phone}
                     rules={[
                         { required: true, message: '手机号必须输入' }
                     ]}
@@ -68,7 +82,7 @@ export default class UserForm extends PureComponent {
                 <Item
                     label="邮箱："
                     name='email'
-                    initialValue=''
+                    initialValue={user.email}
                     rules={[
                         { required: true, message: '邮箱必须输入' }
                     ]}
@@ -78,7 +92,7 @@ export default class UserForm extends PureComponent {
                 <Item
                     label="角色："
                     name='role_id'
-                    initialValue=''
+                    initialValue={user.role_id}
                 >
                     <Select>
                         {roles.map(role => <Option key={role._id} value={role._id}>{role.name}</Option>)}
